@@ -30,3 +30,22 @@ ORDER BY price_date, rnk;
  AAPL          | 2024-01-03 |    184.2500 |   2 |         2 |  2
  MSFT          | 2024-01-04 |    375.5000 |   1 |         1 |  1
  AAPL          | 2024-01-05 |    187.0000 |   1 |         1 |  1
+
+
+3. postgres=# SELECT instrument_id, price_date, close_price,
+  ROUND(AVG(close_price) OVER (
+    PARTITION BY instrument_id ORDER BY price_date
+    ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+  ), 4) AS rolling_3d_avg
+FROM instrument_prices WHERE source='bloomberg'
+ORDER BY instrument_id, price_date;
+ instrument_id | price_date | close_price | rolling_3d_avg 
+---------------+------------+-------------+----------------
+ AAPL          | 2024-01-02 |    185.2000 |       185.2000
+ AAPL          | 2024-01-03 |    184.2500 |       184.7250
+ AAPL          | 2024-01-05 |    187.0000 |       185.4833
+ MSFT          | 2024-01-02 |    374.0200 |       374.0200
+ MSFT          | 2024-01-03 |    374.0200 |       374.0200
+ MSFT          | 2024-01-04 |    375.5000 |       374.5133
+(6 rows)
+
